@@ -1,0 +1,50 @@
+{
+  "services": {
+    "yahoo": {
+      "description": "Financial data from Yahoo Finance.",
+      "commands": {
+        "historical": {
+          "provider": "yahoo/historical.js",
+          "description": "Provides historical data about a specific symbol.",
+          "parameters": {
+            "symbol": {
+              "description": "Symbol to query.",
+              "required": true
+            },
+            "from": {
+              "description": "Start date for the query.",
+              "required": true
+            },
+            "to": {
+              "description": "End date for the query.",
+              "required": false
+            },
+            "period": {
+              "description": "Period or granularity. Possible values: 'd' (daily), 'w' (weekly), 'm' (monthly), 'v' (dividends only).",
+              "required": false
+            }
+          }
+        },
+        "snapshot": {
+          "provider": "yahoo/snapshot.js",
+          "description": "Provides a snapshot for a specific symbol.",
+          "parameters": {
+            "symbol": {
+              "description": "Symbol to query.",
+              "required": true
+            }
+          }
+        }
+      }
+    }
+  },
+  "interfaces": {
+    "rest": {
+      "type": "interfaces/rest",
+      "config": {
+        "host": "localhost",
+        "port": 3001
+      }
+    }
+  }
+}
