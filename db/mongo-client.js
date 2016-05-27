@@ -41,12 +41,29 @@ function getOldestDailySnapshot(db, source) {
         var end = new Date();
         end.setHours(23,59,59,999);
 
-        db.collection('snapshots').find({ source: source, timestamp: {$gte: start, $lt: end}  }).limit(1).sort({ 'timestamp' : -1 }).toArray(function(err, items) {
+        db.collection('snapshots').find({ source: source, timestamp: {$gte: start, $lt: end}  }).limit(1).sort({ 'timestamp' : 1 }).toArray(function(err, items) {
             if(err) {
                 return reject(err);
             }
 
             return resolve(items[0]);
+        });
+    });
+}
+
+function getDailySnapshots(db, symbol, source, date) {
+    var start = new Date(date.getTime());
+    start.setHours(0,0,0,0);
+    var end = new Date(date.getTime());
+    end.setHours(23,59,59,999);
+
+    return Q.Promise((resolve, reject) => {
+        db.collection('snapshots').find({ symbol: symbol, source: source, timestamp: {$gte: start, $lt: end} }).sort({ 'timestamp' : 1 }).toArray(function(err, items) {
+            if(err) {
+                return reject(err);
+            }
+
+            return resolve(items);
         });
     });
 }
@@ -96,6 +113,7 @@ function insertSnapshotIfNotExists(db, snapshot, source) {
             }
 
             if(items.length > 0) {
+                items[0].timestamp = new Date();
                 return updateSnapshot(db, items[0]).then((item) => {
                     resolve(item);
                 });
@@ -114,6 +132,7 @@ module.exports = {
     disconnect: disconnect,
     getRecentSnapshot: getRecentSnapshot,
     getOldestDailySnapshot: getOldestDailySnapshot,
+    getDailySnapshots: getDailySnapshots,
     insertSnapshot: insertSnapshot,
     updateSnapshot: updateSnapshot,
     insertSnapshotIfNotExists: insertSnapshotIfNotExists

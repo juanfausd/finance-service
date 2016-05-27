@@ -21,34 +21,22 @@ function isRecentSnapshot(snapshot) {
  * Provides a snapshot for a specific symbol.
  *
  * @param symbol
+ * @param date
  * @returns {*}
  */
-module.exports = (symbol) => {
+module.exports = (symbol, date) => {
+    date = date ? new Date(date) : new Date();
+
     return Q.promise((resolve, reject) => {
         mongo_client.connect()
         .then((db) => {
-            return mongo_client.getRecentSnapshot(db, symbol, SOURCE)
-            .then((snapshot) => {
-                console.log('-------------');
-                console.log(snapshot);
-                if(snapshot) {
-                    return resolve(snapshot);
-                }
-
-                return yahoo_finance.snapshot({ symbol: symbol })
-                .then((snapshot) => {
-                    return mongo_client.insertSnapshot(db, snapshot, SOURCE);
-                })
-                .then((snapshot) => {
-                    mongo_client.disconnect(db);
-                    return resolve(snapshot);
-                })
-                .catch((err) => {
-                    mongo_client.disconnect(db);
-                    reject(err);
-                });
+            return mongo_client.getDailySnapshots(db, symbol, SOURCE, date)
+            .then((snapshots) => {
+                mongo_client.disconnect(db);
+                return resolve(snapshots);
             })
             .catch((err) => {
+                mongo_client.disconnect(db);
                 reject(err);
             });
         })

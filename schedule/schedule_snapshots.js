@@ -25,18 +25,19 @@ module.exports = () => {
                     })
                     .then((snapshot) => {
                         mongo_client.disconnect(db);
-                        console.log('Executed scheduled task to retrieve snapshots.');
+                        console.log('Executed scheduled task to retrieve snapshots from: ' + db_snapshot.symbol + ".");
                         return resolve(snapshot);
                     })
                     .catch((err) => {
                         console.log(err);
+                        mongo_client.disconnect(db);
                         reject(err);
                     });
                 });
             })
             .catch((err) => {
-                reject(err);
                 console.log('An error occurred while executing scheduled task to retrieve snapshots.');
+                reject(err);
             });
         });
     }, null, true, "America/Los_Angeles");

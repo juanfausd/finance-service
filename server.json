@@ -34,6 +34,20 @@
               "required": true
             }
           }
+        },
+        "daily": {
+          "provider": "yahoo/daily.js",
+          "description": "Provides daily snapshots for a specific symbol.",
+          "parameters": {
+            "symbol": {
+              "description": "Symbol to query.",
+              "required": true
+            },
+            "date": {
+              "description": "Date to query.",
+              "required": true
+            }
+          }
         }
       }
     }
