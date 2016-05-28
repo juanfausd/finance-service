@@ -29,8 +29,6 @@ module.exports = (symbol) => {
         .then((db) => {
             return mongo_client.getRecentSnapshot(db, symbol, SOURCE)
             .then((snapshot) => {
-                console.log('-------------');
-                console.log(snapshot);
                 if(snapshot) {
                     return resolve(snapshot);
                 }

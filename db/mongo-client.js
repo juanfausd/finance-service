@@ -34,19 +34,19 @@ function getRecentSnapshot(db, symbol, source) {
     });
 }
 
-function getOldestDailySnapshot(db, source) {
+function getSymbols(db, source) {
     return Q.Promise((resolve, reject) => {
         var start = new Date();
         start.setHours(0,0,0,0);
         var end = new Date();
         end.setHours(23,59,59,999);
 
-        db.collection('snapshots').find({ source: source, timestamp: {$gte: start, $lt: end}  }).limit(1).sort({ 'timestamp' : 1 }).toArray(function(err, items) {
+        db.collection('snapshots').find({ source: source }, { symbol: 1 }).sort({ 'timestamp' : 1 }).toArray(function(err, items) {
             if(err) {
                 return reject(err);
             }
 
-            return resolve(items[0]);
+            return resolve(items);
         });
     });
 }
@@ -78,6 +78,7 @@ function insertSnapshot(db, snapshot, source) {
                 console.log(err);
                 return reject(err);
             }
+            console.log('Inserted snapshot. Symbol: ' + snapshot.symbol);
             return resolve(snapshot);
         });
     });
@@ -90,6 +91,7 @@ function updateSnapshot(db, snapshot) {
                 console.log(err);
                 return reject(err);
             }
+            console.log('Updated snapshot. Symbol: ' + snapshot.symbol);
             return resolve(snapshot);
         });
     });
@@ -131,7 +133,7 @@ module.exports = {
     connect: connect,
     disconnect: disconnect,
     getRecentSnapshot: getRecentSnapshot,
-    getOldestDailySnapshot: getOldestDailySnapshot,
+    getSymbols: getSymbols,
     getDailySnapshots: getDailySnapshots,
     insertSnapshot: insertSnapshot,
     updateSnapshot: updateSnapshot,
