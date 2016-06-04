@@ -26,8 +26,8 @@ function isRecentSnapshot(snapshot) {
 module.exports = (symbol) => {
     return Q.promise((resolve, reject) => {
         mongo_client.connect()
-        .then((db) => {
-            return mongo_client.getRecentSnapshot(db, symbol, SOURCE)
+        .then(() => {
+            return mongo_client.getRecentSnapshot(symbol, SOURCE)
             .then((snapshot) => {
                 if(snapshot) {
                     return resolve(snapshot);
@@ -35,14 +35,14 @@ module.exports = (symbol) => {
 
                 return yahoo_finance.snapshot({ symbol: symbol })
                 .then((snapshot) => {
-                    return mongo_client.insertSnapshot(db, snapshot, SOURCE);
+                    return mongo_client.insertSnapshot(snapshot, SOURCE);
                 })
                 .then((snapshot) => {
-                    mongo_client.disconnect(db);
+                    mongo_client.disconnect();
                     return resolve(snapshot);
                 })
                 .catch((err) => {
-                    mongo_client.disconnect(db);
+                    mongo_client.disconnect();
                     reject(err);
                 });
             })

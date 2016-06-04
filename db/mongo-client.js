@@ -1,28 +1,18 @@
 // ** Dependencies
-const MongoClient = require('mongodb').MongoClient;
+const connection_manager = require('./mongo-connection');
 const Q = require('q');
 
-// ** Config
-const url = 'mongodb://localhost:27017/finance';
-
 function connect() {
-    return Q.Promise((resolve, reject) => {
-        MongoClient.connect(url, function (err, db) {
-            if (err) {
-                console.log('Unable to connect to the mongoDB server. Error:', err);
-                return reject(err);
-            }
-
-            return resolve(db);
-        });
-    });
+    return connection_manager.connect();
 }
 
-function disconnect(db) {
-    db.close();
+function disconnect() {
+    return connection_manager.disconnect();
 }
 
-function getRecentSnapshot(db, symbol, source) {
+function getRecentSnapshot(symbol, source) {
+    const db = connection_manager.getConnection();
+
     return Q.Promise((resolve, reject) => {
         db.collection('snapshots').find({ symbol: symbol, source: source }).limit(1).sort({ 'timestamp' : 1 }).toArray(function(err, items) {
             if(err) {
@@ -34,7 +24,9 @@ function getRecentSnapshot(db, symbol, source) {
     });
 }
 
-function getSymbols(db, source) {
+function getSymbols(source) {
+    const db = connection_manager.getConnection();
+
     return Q.Promise((resolve, reject) => {
         var start = new Date();
         start.setHours(0,0,0,0);
@@ -51,7 +43,9 @@ function getSymbols(db, source) {
     });
 }
 
-function getDailySnapshots(db, symbol, source, date) {
+function getDailySnapshots(symbol, source, date) {
+    const db = connection_manager.getConnection();
+
     var start = new Date(date.getTime());
     start.setHours(0,0,0,0);
     var end = new Date(date.getTime());
@@ -68,7 +62,9 @@ function getDailySnapshots(db, symbol, source, date) {
     });
 }
 
-function insertSnapshot(db, snapshot, source) {
+function insertSnapshot(snapshot, source) {
+    const db = connection_manager.getConnection();
+
     snapshot.timestamp = new Date();
     snapshot.source = source;
 
@@ -84,7 +80,9 @@ function insertSnapshot(db, snapshot, source) {
     });
 }
 
-function updateSnapshot(db, snapshot) {
+function updateSnapshot(snapshot) {
+    const db = connection_manager.getConnection();
+
     return Q.Promise((resolve, reject) => {
         return db.collection('snapshots').updateOne({ _id: snapshot._id }, { $set: { timestamp: snapshot.timestamp } }, function (err, item) {
             if(err) {
@@ -97,7 +95,9 @@ function updateSnapshot(db, snapshot) {
     });
 }
 
-function insertSnapshotIfNotExists(db, snapshot, source) {
+function insertSnapshotIfNotExists(snapshot, source) {
+    const db = connection_manager.getConnection();
+
     snapshot.timestamp = new Date();
     snapshot.source = source;
     const query = {
@@ -116,12 +116,12 @@ function insertSnapshotIfNotExists(db, snapshot, source) {
 
             if(items.length > 0) {
                 items[0].timestamp = new Date();
-                return updateSnapshot(db, items[0]).then((item) => {
+                return updateSnapshot(items[0]).then((item) => {
                     resolve(item);
                 });
             }
             else {
-                return insertSnapshot(db, snapshot, source).then((item) => {
+                return insertSnapshot(snapshot, source).then((item) => {
                     resolve(item);
                 });
             }

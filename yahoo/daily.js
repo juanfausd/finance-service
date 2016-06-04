@@ -1,21 +1,9 @@
 // ** Dependencies
-const yahoo_finance = require('yahoo-finance');
 const Q = require('q');
 const mongo_client = require('../db/mongo-client');
 
 // ** Constants
-const REFRESH_INTERVAL_MINUTES = 30;
 const SOURCE = 'yahoo';
-
-function isRecentSnapshot(snapshot) {
-    if(!snapshot) {
-        return false;
-    }
-
-    const tolerance = new Date((new Date()).getTime() - REFRESH_INTERVAL_MINUTES * 60000);
-
-    return snapshot.timestamp > tolerance;
-}
 
 /**
  * Provides a snapshot for a specific symbol.
@@ -29,14 +17,14 @@ module.exports = (symbol, date) => {
 
     return Q.promise((resolve, reject) => {
         mongo_client.connect()
-        .then((db) => {
-            return mongo_client.getDailySnapshots(db, symbol, SOURCE, date)
+        .then(() => {
+            return mongo_client.getDailySnapshots(symbol, SOURCE, date)
             .then((snapshots) => {
-                mongo_client.disconnect(db);
+                mongo_client.disconnect();
                 return resolve(snapshots);
             })
             .catch((err) => {
-                mongo_client.disconnect(db);
+                mongo_client.disconnect();
                 reject(err);
             });
         })
