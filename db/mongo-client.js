@@ -28,12 +28,15 @@ function getSymbols(source) {
     const db = connection_manager.getConnection();
 
     return Q.Promise((resolve, reject) => {
-        var start = new Date();
-        start.setHours(0,0,0,0);
-        var end = new Date();
-        end.setHours(23,59,59,999);
+        //var start = new Date();
+        //start.setHours(0,0,0,0);
+        //var end = new Date();
+        //end.setHours(23,59,59,999);
 
-        db.collection('snapshots').find({ source: source }, { symbol: 1 }).sort({ 'timestamp' : 1 }).toArray(function(err, items) {
+        var start = new Date();
+        start.setDate(start.getDate()-5);
+
+        db.collection('snapshots').find({ source: source, timestamp : { $gte: start } }, { symbol: 1 }).sort({ 'timestamp' : 1 }).toArray(function(err, items) {
             if(err) {
                 return reject(err);
             }

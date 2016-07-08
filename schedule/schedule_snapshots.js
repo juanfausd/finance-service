@@ -19,8 +19,13 @@ module.exports = () => {
                 .then((symbols) => {
                     i++;
 
-                    if(i == symbols.length) {
+                    if(i >= symbols.length) {
                         i = 0;
+                    }
+
+                    if(!symbols[i]) {
+                        console.log('No more symbols to fetch.');
+                        resolve(null)
                     }
 
                     return yahoo_finance.snapshot({ symbol: symbols[i].symbol })
@@ -29,6 +34,7 @@ module.exports = () => {
                     })
                     .then((snapshot) => {
                         console.log('Executed scheduled task to retrieve snapshots from: ' + symbols[i].symbol + '.');
+                        //mongo_client.disconnect();
                         return resolve(snapshot);
                     })
                     .catch((err) => {
@@ -39,6 +45,7 @@ module.exports = () => {
                 })
                 .catch((err) => {
                     console.log('An error occurred while executing scheduled task to retrieve snapshots.');
+                    console.log(err);
                     mongo_client.disconnect();
                     reject(err);
                 });
